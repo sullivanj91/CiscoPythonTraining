@@ -1,0 +1,213 @@
+       '''
+       All about decorators
+       
+       A ''def'' does 3 things:
+           1. create a function object
+           2. attach metadata (__name__, __doc__, ...)
+           3. assign that object to a variable
+       
+       Identity Function
+           the output is the same as the input
+       
+       Higher-Order Fuction
+           either receives a funtion as input
+           emits a function as ouput
+           or both
+       
+       Pure Function
+           always returns the same output for a particular input
+           and has no side-effects (only returns a value)
+       
+       Wrapper Function
+           uses a helper function
+           typically outputs a similar result to the helper
+           improving the behavior of the helper.
+       
+       Factory Function
+           makes and returns a new function
+       
+       Closure
+           Store a reference to local variables
+           from the enclosing scope.
+    1: '''
+       
+    1: import time
+    1: import math
+    1: import random
+       
+       ### Factory Functions ######################
+       
+    1: def make_pow(exponent):
+           def power(base):
+               return base ** exponent
+           return power
+       
+    1: def make_logging(func):
+    4:     def logging_version(x):
+               print 'calling %r' % func.__name__
+               print 'with', x
+               result = func(x)
+               print 'resut was', result
+               return result
+    4:     return logging_version
+       
+    1: def make_caching(func):
+    2:     cache = {}
+    2:     def wrapper(x):
+  596:         if x in cache:
+  396:             return cache[x]
+  200:         result = func(x)
+  200:         cache[x] = result
+  200:         return result
+    2:     return wrapper
+       
+    1: def random_cache(func):
+    1:     maxsize = 2
+    1:     cache = {}
+    1:     def wrapper(x):
+               if x in cache:
+                   return cache[x]
+               result = func(x)
+               if len(cache) >= maxsize:
+                   del cache[random.choice(cache.keys())]
+               cache[x] = result
+               return result
+    1:     return wrapper
+       
+       ### Wrapper Functions ######################
+       
+    1: def logging_sin(x):
+           print 'calling sin'
+           print 'with', x
+           result = math.sin(x)
+           print 'resut was', result
+           return result
+       
+    1: def better_sqrt(x):
+           'sqrt that works with negative inputs'
+           if x >= 0:
+               return math.sqrt(x)
+           return math.sqrt(-x) * 1j
+       
+    1: def logging_cos(x):
+           print 'calling cos'
+           print 'with', x
+           result = math.cos(x)
+           print 'resut was', result
+           return result
+       
+    1: def logging_tan(x):
+           print 'calling tan'
+           print 'with', x
+           result = math.tan(x)
+           print 'resut was', result
+           return result
+       
+       ### Patching ##############################
+       
+    1: import theirs
+       
+    1: old_sqrt = math.sqrt
+       
+    1: def patch_sqrt(x):
+           'sqrt that works with negative inputs'
+    4:     if x >= 0:
+    3:         return old_sqrt(x)
+    1:     return old_sqrt(-x) * 1j
+       
+    1: math.sqrt = patch_sqrt
+       
+    1: print theirs.sqrts([81, -49, 4, 16])
+       
+       ### Higher-Order Functions #################
+       
+    1: def identity(x):
+           return x
+       
+    1: registry = {}
+       
+    1: def register(func):
+    4:     registry[func.__name__] = func
+    4:     return func
+       
+    1: def add_docstring(func):
+    4:     if func.__doc__ is None:
+    3:         func.__doc__ = 'unknown documentation'
+    4:     return func
+       
+       ### Normal Functions #################
+       
+    1: def square(x):
+           return x * x
+       
+    1: square = register(square)
+    1: square = add_docstring(square)
+    1: square = make_logging(square)
+       
+    1: def cube(x):
+           return x ** 3
+       
+    1: cube = register(cube)
+    1: cube = add_docstring(cube)
+    1: cube = make_logging(cube)
+       
+    1: def power(base, exponent=2):
+           return base ** exponent
+       
+    1: power = register(power)
+    1: power = add_docstring(power)
+       
+    1: def collatz(x):
+           'simple example of the halting problem'
+           if x % 2 == 0:
+               return x // 2
+           return 3 * x + 1
+       
+    1: collatz = register(collatz)
+    1: collatz = add_docstring(collatz)
+    1: collatz = make_logging(collatz)
+       
+    1: @make_caching
+       def conjecture(x):
+           'iterating collatz on itself shoud reach 1'
+           while x != 1:
+               x = collatz(x)
+           return True
+       
+    1: cache = {}
+       
+    1: def caching_conjecture(x):
+           if x in cache:
+               return cache[x]
+           result = conjecture(x)
+           cache[x] = result
+           return result 
+       
+    1: @random_cache
+    1: @make_logging
+       def hardwork(x):
+           'simulate doing hard work'
+           print 'doing hard work'
+           time.sleep(1)
+           return x + 1
+       
+    1: cache = {}
+       
+    1: def caching_hardwork(x):
+           'do hard work, but remember past results'
+           if x in cache:
+               return cache[x]
+           result = hardwork(x)
+           cache[x] = result
+           return result
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       

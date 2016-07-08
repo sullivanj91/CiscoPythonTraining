@@ -1,0 +1,12 @@
+       '''
+       theirs.py
+       Pretend this is some complex proprietary coe.
+       or perhaps from some sother team that you don't
+       have permission to change.
+    1: '''
+       
+    1: import math
+       
+    1: def sqrts(numbers):
+           'applies sqrt to numbers'
+    1:     return map(math.sqrt, numbers)
